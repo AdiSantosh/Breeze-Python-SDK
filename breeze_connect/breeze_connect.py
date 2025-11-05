@@ -12,9 +12,10 @@ import pandas as pd
 import os
 import sys
 import logging
+from dataclasses import dataclass
+from enum import Enum
 
 dirs = os.path.dirname(os.path.abspath(__file__))
-
 sys.path.insert(1,dirs)
 import config
 import socket
@@ -56,7 +57,7 @@ class SocketEventBreeze(socketio.ClientNamespace):
     def __init__(self, namespace, breeze_instance):
         super().__init__(namespace)
         self.breeze = breeze_instance
-        self.sio = socketio.Client()
+        self.sio = socketio.Client(logger=True, engineio_logger=True)
         self.tokenlist = set()
         self.ohlcstate = set()
         self.authentication = True
@@ -64,7 +65,7 @@ class SocketEventBreeze(socketio.ClientNamespace):
     def my_connect_error(self,error):
         self.authentication = False
 
-    def connect(self,hostname,is_ohlc_stream = False,strategy_flag = False):
+    def connect(self,hostname: str, is_ohlc_stream: bool = False, strategy_flag: bool = False):
         try:
             auth = {"user": self.breeze.user_id, "token": self.breeze.session_key}
             if is_ohlc_stream:
