@@ -3,7 +3,7 @@ sys.path.insert(0, '..')
 
 
 
-from breeze_connect.core.config import ExceptionMessage
+from breeze_connect.config_new import ExceptionMessage
 
 except_message = ExceptionMessage
 

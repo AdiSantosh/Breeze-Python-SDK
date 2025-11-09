@@ -9,7 +9,7 @@ import logging, os
 logger = logging.getLogger("WebSocketLogger")
 
 
-from core.config import ExceptionMessage
+from breeze_connect.config_new import ExceptionMessage
 
 
 except_message = ExceptionMessage
