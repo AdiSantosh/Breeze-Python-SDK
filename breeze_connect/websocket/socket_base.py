@@ -3,9 +3,16 @@ import socketio
 import threading
 from enum import Enum
 from typing import Set, Dict, Optional
-import logging
+import dotenv
+import logging, os
 
 logger = logging.getLogger("WebSocketLogger")
+
+
+from core.config import ExceptionMessage
+
+
+except_message = ExceptionMessage
 
 class SocketState(Enum):
     """WebSocket connection states."""
@@ -16,17 +23,13 @@ class SocketState(Enum):
 
 class CustomHeaders(Enum):
     """Custom headers for WebSocket connections."""
-    USER_AGENT = {"User-Agent": "python-socketio[client]/socket", "timeout": 3}
-    APP_JSON = {"Content-Type": "application/json", "timeout": 3}
-
-    @property
-    def headers(self) -> Dict[str]:
-        return self.value["User-Agent"]
+    USER_AGENT = {"User-Agent": "python-socketio[client]/socket"}
+    APP_JSON = {"Content-Type": "application/json"}
 
 class SocketBase(socketio.ClientNamespace):
     """Base class for WebSocket connections."""
 
-    def __init__(self, namespace: str, breeze_instance: BreezeConnect):  ## Instance of BreezeConnect
+    def __init__(self, namespace: str, breeze_instance):  ## Instance of BreezeConnect
         """
         Initialize socket client.
         
@@ -56,14 +59,14 @@ class SocketBase(socketio.ClientNamespace):
         self.max_reconnect_attempts: int = 5
         self.reconnect_delay: int = 2 #secs
 
-        self._register_handlers()
+        self._register_handlers()  
 
     def _register_handlers(self):
         """Register event handlers for Socket.IO events."""
         self.sio.on('connect', self.on_connect_event)
         self.sio.on('disconnect', self.on_disconnect_event)
-        self.sio.on('error', self.on_connect_error)
-
+        self.sio.on('connect_error', self.on_connect_error)
+## change all the message to what is expected from the server (check error, disconnect etc)
 
     def _set_state(self, new_state: SocketState):
         """Thread-safe state setter."""
@@ -109,22 +112,35 @@ class SocketBase(socketio.ClientNamespace):
         auth = {"user": self.breeze.user_id, "token": self.breeze.seesion_key}
         try:
             if is_ohlc:
-                self.sio.connect(hostname, socketio_path="ohlcvstream", headers={"User-Agent": "python-socketio[client]/socket"}, auth=auth,
-                                 transports="websocket", wait_timeout=3)
-                
-        
+                self.sio.connect(hostname, socketio_path="ohlcvstream", headers=CustomHeaders.USER_AGENT.value, auth=auth,
+                                transports="websocket", wait_timeout=3)
+            else:
+                self.sio.connect(hostname, headers=CustomHeaders.USER_AGENT.value, auth=auth,
+                                transports="websocket", wait_timeout=3)
+            self._register_handlers()
+
+        except Exception as e:
+            if self.sio.connected:
+                logger.info("WebSocket already connected.")
+                self._set_state(SocketState.CONNECTED)
+            else:
+                if hostname == os.getenv("LIVE_OHLC_STREAM_URL"):
+                    raise Exception(except_message.OHLC_SOCKET_CONNECTION_DISCONNECTED.value)
+                elif hostname == os.getenv("LIVE_STREAM_URL"):
+                    raise Exception(except_message.LIVESTREAM_SOCKET_CONNECTION_DISCONNECTED.value)
+                else:
+                    raise Exception(except_message.ORDERNOTIFY_SOCKET_CONNECTION_DISCONNECTED.value)
+
+
+    def _resubscribe_to_symbols(self):
+        pass
 
 
 
-
-
-
-
-
-# class BreezeConnect():
-#     def __init__(self):
-#         self.user_id = ""
-#         self.seesion_key = ""
+class BreezeConnect():
+    def __init__(self):
+        self.user_id = ""
+        self.seesion_key = ""
 
     
 
