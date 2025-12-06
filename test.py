@@ -1,10 +1,3 @@
-import sys
-sys.path.insert(0, '..')
+from breeze_connect.utils.parsers import MessageType
 
-
-
-from breeze_connect.config_new import ExceptionMessage
-
-except_message = ExceptionMessage
-
-print(except_message.AUTHENICATION_EXCEPTION.value)
+print(type(MessageType.ORDER_UPDATE_EQUITY.value.split('_')))

@@ -562,7 +562,7 @@ class BreezeConnect():
             #iclick_data['sequence_number'] = data[0]
             iclick_data['stock_name'] = data[0]
             iclick_data['stock_code'] = data[1]
-            iclick_data['action_type'] = data[2]
+            iclick_data['action_type'] = data[2]  
             iclick_data['expiry_date'] = data[3]
             iclick_data['strike_price'] = data[4]
             iclick_data['option_type'] = data[5]
@@ -584,7 +584,7 @@ class BreezeConnect():
             strategy_dict = dict()
             strategy_dict['strategy_date'] = data[0]
             strategy_dict['modification_date'] = data[1]
-            strategy_dict['portfolio_id'] = data[2]
+            strategy_dict['portfolio_id'] = data[2]   
             strategy_dict['call_action'] = data[3]
             strategy_dict['portfolio_name'] = data[4]
             strategy_dict['exchange_code'] = data[5]
